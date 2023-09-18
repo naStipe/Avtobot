@@ -16,28 +16,58 @@
     // ];
 
     setTimeout(lookForItems, 2000);
-
-
-
+    let got_list_times = 0;
 
     async function lookForItems(){
-        console.log('Before the loop')
+        console.log('Before the loop');
         let search_button_not_found_times = 0;
-        console.log('In the loop boob')
 
         await findSearchButton(search_button_not_found_times)
 
+        got_list_times++;
+        console.log('Got list: ' + got_list_times);
+        if(got_list_times >= 50){
+            console.log('Reloading page');
+            location.reload();
+        }
+
+        checkForError();
         const item_list = document.getElementsByClassName('itemfloat');
-        console.log('Got list');
-        Array.from(item_list).forEach((item) => {
-            console.log(item.children[0].innerHTML);
-        });
+        const buy_button_list = document.getElementsByClassName('item_market_action_button_contents');
+        let bought_item = false
+        for(let i = 0; i < item_list.length; i++){
+            if(item_list[i].children[0].innerHTML < 0.084){
+                try{
+                    let item_float = item_list[i].children[0].innerHTML;
+                    console.log('Item found (' + item_float + ')');
+                    if(window.confirm([item_float]) == true){
+                        buy_button_list[i].click();
+                        location.reload()
+                    }
+
+                } catch (err){
+                    console.log('Couldn`t get item')
+                    location.reload()
+                }
+
+            }
+        }
+
         getElementByXpath('//*[@id="market_listing_filter_form"]/div/a').click()
+
         setTimeout(lookForItems, 2000);
     }
 
     function getElementByXpath(path) {
         return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    }
+
+    function checkForError(){
+        let errorMsgExists = document.getElementsByClassName('sih_label sih_label_warning')[0];
+        if(errorMsgExists != null){
+            console.error('Error occurred')
+            location.reload()
+        }
     }
     async function findSearchButton(search_button_not_found_times) {
         try {
@@ -47,19 +77,19 @@
                 console.log('Found search button');
             } else {
                 search_button_not_found_times++;
-                console.log('Search button not found: ' + search_button_not_found_times);
-                await new Promise(resolve => setTimeout(resolve, 1000))
-                await findSearchButton(search_button_not_found_times)
+                console.log('Search button not found: ');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await findSearchButton(search_button_not_found_times);
             }
         } catch (err) {
             search_button_not_found_times++;
-            console.log('Search button not found: ' + search_button_not_found_times);
+            console.log('Search button not found: ');
             if (search_button_not_found_times >= 7) {
                 console.log('Could not find search button, reloading page');
                 location.reload();
             }
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            await findSearchButton(search_button_not_found_times)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await findSearchButton(search_button_not_found_times);
         }
     }
 
