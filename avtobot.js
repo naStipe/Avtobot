@@ -32,22 +32,24 @@
         }
 
         checkForError();
-        const item_list = document.getElementsByClassName('itemfloat');
+        let item_list = document.getElementsByClassName('itemfloat');
         const buy_button_list = document.getElementsByClassName('item_market_action_button_contents');
         let bought_item = false
         for(let i = 0; i < item_list.length; i++){
-            if(item_list[i].children[0].innerHTML < 0.084){
+            if(item_list[i].children[0].innerHTML < 0.1){
                 try{
                     let item_float = item_list[i].children[0].innerHTML;
                     console.log('Item found (' + item_float + ')');
-                    if(window.confirm([item_float]) == true){
+                    if(window.confirm([item_float]) === true){
                         buy_button_list[i].click();
-                        location.reload()
+                        console.log(item_float + ' item bought')
+                        item_list = []
+                        await (location.reload(), 5000);
                     }
 
                 } catch (err){
-                    console.log('Couldn`t get item')
-                    location.reload()
+                    console.log('Could not get item')
+                    await location.reload()
                 }
 
             }
@@ -77,13 +79,17 @@
                 console.log('Found search button');
             } else {
                 search_button_not_found_times++;
-                console.log('Search button not found: ');
+                console.log('Search button not found: ' + search_button_not_found_times);
+                if (search_button_not_found_times >= 7) {
+                    console.log('Could not find search button, reloading page');
+                    location.reload();
+                }
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 await findSearchButton(search_button_not_found_times);
             }
         } catch (err) {
             search_button_not_found_times++;
-            console.log('Search button not found: ');
+            console.log('Search button not found: ' + search_button_not_found_times);
             if (search_button_not_found_times >= 7) {
                 console.log('Could not find search button, reloading page');
                 location.reload();
